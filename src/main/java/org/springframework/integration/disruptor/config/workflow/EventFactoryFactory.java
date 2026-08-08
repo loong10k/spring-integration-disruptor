@@ -15,6 +15,18 @@ import org.springframework.util.StringUtils;
 
 import com.lmax.disruptor.EventFactory;
 
+/**
+ * Factory that creates an EventFactory for a given event type.
+ * Supports native LMAX event factories, method-invoking adapters,
+ * and a fallback instantiation strategy.
+ * 
+ * @param <T> the event type
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see config.workflow.eventfactory.FallbackEventFactoryAdapter
+ * @see config.workflow.eventfactory.MethodInvokingEventFactoryAdapter
+ */
 final class EventFactoryFactory<T> implements BeanFactoryAware {
 
 	private final Log log = LogFactory.getLog(this.getClass());
@@ -27,16 +39,32 @@ final class EventFactoryFactory<T> implements BeanFactoryAware {
 
 	private String name;
 
+	/**
+     * Sets the bean name of the event factory to look up.
+     *
+     * @param name the bean name
+     */
 	public void setName(final String name) {
 		this.name = name;
 	}
 
 	private Class<T> eventType;
 
+	/**
+     * Sets the event type class.
+     *
+     * @param eventType the event type
+     */
 	public void setEventType(final Class<T> eventType) {
 		this.eventType = eventType;
 	}
 
+	/**
+     * Creates an EventFactory. If a name is set, looks up the bean and wraps it
+     * if necessary; otherwise returns a fallback factory.
+     *
+     * @return the event factory
+     */
 	public EventFactory<T> createEventFactory() {
 		if (StringUtils.hasText(this.name)) {
 			final Object object = this.beanFactory.getBean(this.name);
@@ -54,6 +82,13 @@ final class EventFactoryFactory<T> implements BeanFactoryAware {
 		return new FallbackEventFactoryAdapter<T>(this.eventType);
 	}
 
+	/**
+     * Checks whether the given object is a native LMAX EventFactory with a
+     * compatible return type.
+     *
+     * @param eventFactory the object to check
+     * @return {@code true} if it is a compatible native event factory
+     */
 	boolean isNativeEventFactory(final Object eventFactory) {
 		Assert.isTrue(this.eventType != null, "Event type can not be null");
 		if (eventFactory instanceof EventFactory) {

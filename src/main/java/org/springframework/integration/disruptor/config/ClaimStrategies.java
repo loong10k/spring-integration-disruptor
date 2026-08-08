@@ -5,6 +5,15 @@ import com.lmax.disruptor.MultiThreadedClaimStrategy;
 import com.lmax.disruptor.MultiThreadedLowContentionClaimStrategy;
 import com.lmax.disruptor.SingleThreadedClaimStrategy;
 
+/**
+ * Enumeration of supported LMAX Disruptor claim strategies. Maps human-readable
+ * names to their corresponding ClaimStrategy implementations.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see WaitStrategies
+ * @see com.lmax.disruptor.ClaimStrategy
+ */
 public enum ClaimStrategies {
 
 	MULTI_THREADED("multi-threaded") {
@@ -40,6 +49,12 @@ public enum ClaimStrategies {
 		this.name = name;
 	}
 
+	/**
+     * Finds a claim strategy enum constant by its human-readable name.
+     *
+     * @param name the strategy name (e.g. "multi-threaded", "single-threaded")
+     * @return the matching constant, or {@code null} if not found
+     */
 	public static ClaimStrategies find(final String name) {
 		if (MULTI_THREADED.name.equals(name)) {
 			return MULTI_THREADED;
@@ -52,6 +67,13 @@ public enum ClaimStrategies {
 		}
 	}
 
+	/**
+     * Creates a new ClaimStrategy instance for the given name and buffer size.
+     *
+     * @param name       the strategy name
+     * @param bufferSize the ring buffer size
+     * @return a new claim strategy instance, or {@code null} if the name is unknown
+     */
 	public static ClaimStrategy forName(final String name, final int bufferSize) {
 		final ClaimStrategies found = find(name);
 		if (found != null) {
@@ -61,6 +83,12 @@ public enum ClaimStrategies {
 		}
 	}
 
+	/**
+     * Creates a new instance of this claim strategy with the given buffer size.
+     *
+     * @param bufferSize the ring buffer size
+     * @return a new claim strategy instance
+     */
 	public abstract ClaimStrategy newInstance(int bufferSize);
 
 }

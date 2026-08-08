@@ -10,6 +10,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 
+/**
+ * Abstract base for reflective method invokers. Finds and caches a suitable
+ * method on a target object based on a MethodSpecification, with support for
+ * annotation-based narrowing when multiple methods match.
+ * 
+ * @param <T> the event type
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see MethodFinderUtils
+ * @see MethodSpecification
+ */
 public abstract class AbstractMethodInvoker<T> {
 
 	protected final Log log = LogFactory.getLog(this.getClass());
@@ -18,6 +30,14 @@ public abstract class AbstractMethodInvoker<T> {
 	protected final Class<T> expectedType;
 	protected final Method method;
 
+	/**
+     * Constructs an invoker by finding a suitable method on the target object.
+     *
+     * @param target       the object containing the method; must not be {@code null}
+     * @param expectedType the expected event type; must not be {@code null}
+     * @throws IllegalArgumentException if target or expectedType is {@code null},
+     *                                  or if no suitable method is found
+     */
 	public AbstractMethodInvoker(final Object target, final Class<T> expectedType) {
 		Assert.isTrue(target != null, "Target can not be null");
 		Assert.isTrue(expectedType != null, "Expected type can not be null");
@@ -75,6 +95,13 @@ public abstract class AbstractMethodInvoker<T> {
 
 	protected abstract Class<? extends Annotation> getAnnotationType();
 
+	/**
+     * Casts the given object to the expected event type.
+     *
+     * @param object the object to cast
+     * @return the cast object
+     * @throws ClassCastException if the object cannot be cast
+     */
 	protected T cast(final Object object) {
 		return this.expectedType.cast(object);
 	}

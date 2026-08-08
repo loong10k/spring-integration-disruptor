@@ -19,6 +19,18 @@ import com.lmax.disruptor.Sequence;
 import com.lmax.disruptor.SequenceBarrier;
 import com.lmax.disruptor.WaitStrategy;
 
+/**
+ * Factory that creates and configures a RingBuffer with the appropriate event factory,
+ * claim strategy, wait strategy, event handlers, sequence barriers, and gating
+ * sequences based on the handler group dependency graph.
+ * 
+ * @param <T> the event type stored in the ring buffer
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see HandlerGroupDefinition
+ * @see DependencyGraph
+ */
 final class RingBufferFactory<T> implements BeanFactoryAware, InitializingBean {
 
 	private DependencyGraph depGraph;
@@ -33,46 +45,86 @@ final class RingBufferFactory<T> implements BeanFactoryAware, InitializingBean {
 
 	private String eventFactoryName;
 
+	/**
+     * Sets the bean name of the event factory.
+     *
+     * @param eventFactoryName the event factory bean name
+     */
 	public void setEventFactoryName(final String eventFactoryName) {
 		this.eventFactoryName = eventFactoryName;
 	}
 
 	private HandlerGroupDefinition handlerGroupDefinition;
 
+	/**
+     * Sets the handler group definition.
+     *
+     * @param handlerGroupDefinition the handler group definition
+     */
 	public void setHandlerGroupDefinition(final HandlerGroupDefinition handlerGroupDefinition) {
 		this.handlerGroupDefinition = handlerGroupDefinition;
 	}
 
 	private Class<T> eventType;
 
+	/**
+     * Sets the event type class.
+     *
+     * @param eventType the event type
+     */
 	public void setEventType(final Class<T> eventType) {
 		this.eventType = eventType;
 	}
 
 	private WaitStrategy waitStrategy;
 
+	/**
+     * Sets the wait strategy.
+     *
+     * @param waitStrategy the wait strategy
+     */
 	public void setWaitStrategy(final WaitStrategy waitStrategy) {
 		this.waitStrategy = waitStrategy;
 	}
 
 	private ClaimStrategy claimStrategy;
 
+	/**
+     * Sets the claim strategy.
+     *
+     * @param claimStrategy the claim strategy
+     */
 	public void setClaimStrategy(final ClaimStrategy claimStrategy) {
 		this.claimStrategy = claimStrategy;
 	}
 
 	private Map<String, List<EventHandler<T>>> resolvedHandlerMap;
 
+	/**
+     * Sets the pre-resolved handler map.
+     *
+     * @param resolvedHandlerMap the resolved handler map
+     */
 	public void setResolvedHandlerMap(final Map<String, List<EventHandler<T>>> resolvedHandlerMap) {
 		this.resolvedHandlerMap = resolvedHandlerMap;
 	}
 
+	/**
+     * Initializes the dependency graph and event handler factory.
+     *
+     * @throws Exception if initialization fails
+     */
 	public void afterPropertiesSet() throws Exception {
 		this.depGraph = this.handlerGroupDefinition.createDependencyGraph();
 		this.inverseDepGraph = this.depGraph.inverse();
 		this.eventHandlerFactory = this.createEventHandlerFactory();
 	}
 
+	/**
+     * Creates and configures a RingBuffer with event handlers and gating sequences.
+     *
+     * @return the configured ring buffer
+     */
 	public RingBuffer<T> createRingBuffer() {
 		final RingBuffer<T> ringBuffer = this.initializeRingBuffer();
 		this.setEventHandlers(ringBuffer);

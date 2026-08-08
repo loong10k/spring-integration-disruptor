@@ -7,6 +7,16 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
+/**
+ * XML bean definition parser for the disruptor:workflow element.
+ * Creates a DisruptorWorkflowFactoryBean bean definition, optionally configured
+ * with a gateway interface.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see AbstractDisruptorWorkflowParser
+ * @see config.workflow.DisruptorWorkflowFactoryBean
+ */
 public final class DisruptorWorkflowParser extends AbstractDisruptorWorkflowParser {
 
 	@Override

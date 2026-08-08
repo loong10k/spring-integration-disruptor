@@ -14,6 +14,18 @@ import org.springframework.integration.disruptor.config.workflow.translator.Meth
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+/**
+ * Factory that creates a MessageEventTranslator for translating Spring Integration
+ * messages into ring buffer events. Supports native translators, method-invoking
+ * adapters, and a default MessagingEventTranslator when the event type is MessagingEvent.
+ * 
+ * @param <T> the event type
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see config.workflow.translator.MessageEventTranslator
+ * @see config.workflow.translator.MessagingEventTranslator
+ */
 final class MessageEventTranslatorFactory<T> implements BeanFactoryAware {
 
 	private final Log log = LogFactory.getLog(this.getClass());
@@ -26,16 +38,33 @@ final class MessageEventTranslatorFactory<T> implements BeanFactoryAware {
 
 	private Class<T> eventType;
 
+	/**
+     * Sets the event type class.
+     *
+     * @param eventType the event type
+     */
 	public void setEventType(final Class<T> eventType) {
 		this.eventType = eventType;
 	}
 
 	private String translatorName;
 
+	/**
+     * Sets the bean name of the translator to look up.
+     *
+     * @param translatorName the translator bean name
+     */
 	public void setTranslatorName(final String translatorName) {
 		this.translatorName = translatorName;
 	}
 
+	/**
+     * Creates a MessageEventTranslator. If a name is set, looks up the bean;
+     * for MessagingEvent types, returns a default translator; otherwise throws.
+     *
+     * @return the message event translator
+     * @throws BeanCreationException if no translator can be created
+     */
 	public MessageEventTranslator<T> createTranslator() {
 		if (StringUtils.hasText(this.translatorName)) {
 			final Object translator = this.beanFactory.getBean(this.translatorName);
