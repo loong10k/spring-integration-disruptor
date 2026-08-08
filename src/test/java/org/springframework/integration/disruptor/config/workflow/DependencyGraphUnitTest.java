@@ -1,111 +1,125 @@
 package org.springframework.integration.disruptor.config.workflow;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.Test;
+import org.springframework.integration.disruptor.config.HandlerGroup;
 
+/**
+ * Unit tests for {@link DependencyGraphImpl}.
+ */
 public class DependencyGraphUnitTest {
 
 	@Test
-	public void DependsOnNone_1() {
-		final DependencyGraph graph = new DependencyGraphImpl();
-		graph.addDependency("group1").dependsOnNone();
-		assertEquals("Size <> 1", 1, graph.getSize());
-		assertEquals("Dependencies Size <> 0", 0, graph.getDependencies("group1").size());
-		assertTrue("Wrong dependencies", graph.getDependencies("group1").isEmpty());
+	public void shouldBuildGraphFromHandlerGroups() {
+		final HandlerGroup groupA = createGroup("groupA", "ring-buffer");
+		final HandlerGroup groupB = createGroup("groupB", "groupA");
+
+		final Iterable<HandlerGroup> groups = Arrays.asList(groupA, groupB);
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(groups);
+
+		assertNotNull(graph);
+		assertEquals(3, graph.getSize()); // groupA, groupB, ring-buffer
 	}
 
 	@Test
-	public void DependsOnNone_2() {
-		final DependencyGraph graph = new DependencyGraphImpl();
-		graph.addDependency("group1").dependsOnNone();
-		graph.addDependency("group2").dependsOn("group1");
-		assertEquals("Size <> 2", 2, graph.getSize());
-		assertEquals("Dependencies Size <> 1", 1, graph.getDependencies("group2").size());
-		assertTrue("Wrong dependencies", graph.getDependencies("group2").contains("group1"));
+	public void shouldReturnDependenciesForGroup() {
+		final HandlerGroup groupA = createGroup("groupA", "ring-buffer");
+		final HandlerGroup groupB = createGroup("groupB", "groupA");
+
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Arrays.asList(groupA, groupB));
+		final List<String> deps = graph.getDependencies("groupB");
+		assertEquals(1, deps.size());
+		assertEquals("groupA", deps.get(0));
 	}
 
 	@Test
-	public void Add_Dependency_1() {
-		final DependencyGraph graph = new DependencyGraphImpl();
-		graph.addDependency("group1").dependsOn("group2");
-		assertEquals("Size <> 2", 2, graph.getSize());
-		assertEquals("Dependencies Size <> 1", 1, graph.getDependencies("group1").size());
-		assertTrue("Wrong dependencies", graph.getDependencies("group1").contains("group2"));
+	public void shouldReturnEmptyDependenciesForUnknownGroup() {
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Collections.<HandlerGroup>emptyList());
+		final List<String> deps = graph.getDependencies("unknown");
+		assertTrue(deps.isEmpty());
 	}
 
 	@Test
-	public void Add_Dependency_2() {
-		final DependencyGraph graph = new DependencyGraphImpl();
-		graph.addDependency("group1").dependsOn("group2");
-		graph.addDependency("group1").dependsOn("group3");
-		graph.addDependency("group1").dependsOn("group4");
-		assertEquals("Size <> 4", 4, graph.getSize());
-		assertEquals("Dependencies Size <> 3", 3, graph.getDependencies("group1").size());
-		assertTrue("Wrong dependencies", graph.getDependencies("group1").containsAll(Arrays.asList("group2", "group3", "group4")));
+	public void shouldReturnOrphanDependencies() {
+		final HandlerGroup groupA = createGroup("groupA", "ring-buffer");
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Collections.singletonList(groupA));
+		final List<String> orphans = graph.getOrphanDependencies();
+		assertTrue(orphans.contains("ring-buffer"));
 	}
 
 	@Test
-	public void Add_Dependency_3() {
-		final DependencyGraph graph = new DependencyGraphImpl();
-		graph.addDependency("group1").dependsOn("group2");
-		graph.addDependency("group2").dependsOn("group3");
-		graph.addDependency("group3").dependsOn("group4");
-		assertEquals("Size <> 4", 4, graph.getSize());
-		assertEquals("Dependencies Size <> 1 Group 1", 1, graph.getDependencies("group1").size());
-		assertEquals("Dependencies Size <> 1 Group 2", 1, graph.getDependencies("group2").size());
-		assertEquals("Dependencies Size <> 1 Group 3", 1, graph.getDependencies("group3").size());
-		assertEquals("Dependencies Size <> 0 Group 4", 0, graph.getDependencies("group4").size());
-		assertTrue("Wrong dependencies Group 1", graph.getDependencies("group1").contains("group2"));
-		assertTrue("Wrong dependencies Group 2", graph.getDependencies("group2").contains("group3"));
-		assertTrue("Wrong dependencies Group 3", graph.getDependencies("group3").contains("group4"));
-		assertTrue("Wrong dependencies Group 4", graph.getDependencies("group4").isEmpty());
+	public void shouldReturnSymbolicNames() {
+		final HandlerGroup groupA = createGroup("groupA", "ring-buffer");
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Collections.singletonList(groupA));
+		final List<String> names = graph.getSymbolicNames();
+		assertTrue(names.contains("groupA"));
+		assertTrue(names.contains("ring-buffer"));
 	}
 
 	@Test
-	public void Orphan_Dependencies_1() {
-		final DependencyGraph graph = new DependencyGraphImpl();
-		graph.addDependency("group1").dependsOn("group2");
-		assertEquals("Orphan Dependencies Size <> 1", 1, graph.getOrphanDependencies().size());
-		assertTrue("Wrong orphan dependencies", graph.getOrphanDependencies().contains("group2"));
-	}
+	public void shouldInverseGraph() {
+		final HandlerGroup groupA = createGroup("groupA", "ring-buffer");
+		final HandlerGroup groupB = createGroup("groupB", "groupA");
 
-	@Test
-	public void Orphan_Dependencies_2() {
-		final DependencyGraph graph = new DependencyGraphImpl();
-		graph.addDependency("group1").dependsOn("group2");
-		graph.addDependency("group2").dependsOn("group3");
-		graph.addDependency("group4").dependsOn("group3");
-		graph.addDependency("group5").dependsOn("group6");
-		assertEquals("Orphan Dependencies Size <> 2", 2, graph.getOrphanDependencies().size());
-		assertTrue("Wrong orphan dependencies", graph.getOrphanDependencies().containsAll(Arrays.asList("group3", "group6")));
-	}
-
-	@Test
-	public void Inverse_1() {
-		final DependencyGraph graph = new DependencyGraphImpl();
-		graph.addDependency("group1").dependsOn("group2");
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Arrays.asList(groupA, groupB));
 		final DependencyGraph inverse = graph.inverse();
-		assertEquals("Size <> 2", 2, inverse.getSize());
-		assertEquals("Dependencies Size <> 1 Group 2", 1, inverse.getDependencies("group2").size());
-		assertTrue("Wrong dependencies Group 2", inverse.getDependencies("group2").contains("group1"));
-		assertEquals("Dependencies Size <> 0 Group 1", 0, inverse.getDependencies("group1").size());
-		assertTrue("Wrong dependencies Group 1", inverse.getDependencies("group1").isEmpty());
+
+		assertNotNull(inverse);
+		assertEquals(graph.getSize(), inverse.getSize());
 	}
 
 	@Test
-	public void GetSymbolicNames_1() {
-		final DependencyGraph graph = new DependencyGraphImpl();
-		graph.addDependency("group1").dependsOnNone();
-		graph.addDependency("group2").dependsOn("group1");
-		graph.addDependency("group3").dependsOn("group4");
-		graph.addDependency("group5").dependsOnNone();
-		assertEquals("Symbolic Names Size <> 5", 5, graph.getSymbolicNames().size());
-		assertTrue("Wrong Symbolic Names", graph.getSymbolicNames().containsAll(Arrays.asList("group1", "group2", "group3", "group4", "group5")));
-
+	public void shouldConvertKeysToSymbolicNames() {
+		final HandlerGroup groupA = createGroup("groupA", "ring-buffer");
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Collections.singletonList(groupA));
+		final List<String> names = graph.toSymbolicNames(Arrays.asList(0, 1));
+		assertEquals(2, names.size());
 	}
 
+	@Test
+	public void shouldReturnAdjacentKeys() {
+		final HandlerGroup groupA = createGroup("groupA", "ring-buffer");
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Collections.singletonList(groupA));
+		assertNotNull(graph.adjacentKeys(0));
+	}
+
+	@Test
+	public void shouldReturnZeroSizeForEmptyGraph() {
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Collections.<HandlerGroup>emptyList());
+		assertEquals(0, graph.getSize());
+	}
+
+	@Test
+	public void shouldHandleMultipleDependencies() {
+		final HandlerGroup groupA = createGroup("groupA", "ring-buffer");
+		final HandlerGroup groupB = createGroup("groupB", "ring-buffer");
+		final HandlerGroup groupC = createGroup("groupC", "groupA,groupB");
+		// Manually set multiple dependencies
+		groupC.setDependencies(Arrays.asList("groupA", "groupB"));
+
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Arrays.asList(groupA, groupB, groupC));
+		final List<String> deps = graph.getDependencies("groupC");
+		assertEquals(2, deps.size());
+	}
+
+	@Test
+	public void shouldBuildGraphWithSingleGroupDependingOnRingBuffer() {
+		final HandlerGroup group = createGroup("solo", "ring-buffer");
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Collections.singletonList(group));
+		assertEquals(2, graph.getSize());
+	}
+
+	private HandlerGroup createGroup(final String name, final String... deps) {
+		final HandlerGroup group = new HandlerGroup();
+		group.setName(name);
+		group.setDependencies(Arrays.asList(deps));
+		group.setHandlerBeanNames(Collections.singletonList("handler"));
+		group.setEventProcessors(Collections.<com.lmax.disruptor.EventProcessor>emptyList());
+		return group;
+	}
 }

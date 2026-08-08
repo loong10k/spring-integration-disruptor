@@ -2,6 +2,11 @@ package com.lmax.disruptor;
 
 /**
  * Utility class for simplifying publication to the ring buffer.
+ *
+ * @param <E> the event type stored in the ring buffer
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see com.lmax.disruptor.RingBuffer
  */
 public class EventPublisher<E> {
 	

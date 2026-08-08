@@ -7,6 +7,14 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.integration.disruptor.MessagingEventFactory;
 import org.w3c.dom.Element;
 
+/**
+ * XML bean definition parser for the disruptor:messaging-event-factory element.
+ * Creates a MessagingEventFactory bean definition.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see MessagingEventFactory
+ */
 public class MessagingEventFactoryParser extends AbstractBeanDefinitionParser {
 
 	@Override

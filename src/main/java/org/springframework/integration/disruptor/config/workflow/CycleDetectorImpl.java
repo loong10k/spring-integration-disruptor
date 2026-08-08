@@ -1,5 +1,14 @@
 package org.springframework.integration.disruptor.config.workflow;
 
+/**
+ * Depth-first-search implementation of CycleDetector that detects cycles
+ * in a directed Graph using an explicit stack.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see CycleDetector
+ * @see Graph
+ */
 final class CycleDetectorImpl implements CycleDetector {
 
 	public boolean hasCycle(final Graph graph) {

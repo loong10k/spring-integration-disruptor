@@ -9,6 +9,16 @@ import com.lmax.disruptor.ClaimStrategy;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.WaitStrategy;
 
+/**
+ * XML bean definition parser for the disruptor:ring-buffer element.
+ * Creates a RingBuffer bean definition with the configured event factory,
+ * claim strategy, and wait strategy.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see AbstractRingBufferParser
+ * @see DisruptorNamespaceElements
+ */
 public final class RingBufferParser extends AbstractRingBufferParser {
 
 	@Override

@@ -2,6 +2,14 @@ package org.springframework.integration.disruptor.config;
 
 import org.springframework.integration.config.xml.AbstractIntegrationNamespaceHandler;
 
+/**
+ * Spring Integration namespace handler for the disruptor XML namespace.
+ * Registers bean definition parsers for all disruptor-specific XML elements.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see DisruptorNamespaceElements
+ */
 public class DisruptorNamespaceHandler extends AbstractIntegrationNamespaceHandler {
 
 	public void init() {

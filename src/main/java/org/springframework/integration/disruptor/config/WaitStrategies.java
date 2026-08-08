@@ -6,6 +6,15 @@ import com.lmax.disruptor.SleepingWaitStrategy;
 import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.YieldingWaitStrategy;
 
+/**
+ * Enumeration of supported LMAX Disruptor wait strategies. Maps human-readable
+ * names to their corresponding WaitStrategy implementations.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see ClaimStrategies
+ * @see com.lmax.disruptor.WaitStrategy
+ */
 public enum WaitStrategies {
 
 	BLOCKING("blocking") {
@@ -50,6 +59,12 @@ public enum WaitStrategies {
 		this.name = name;
 	}
 
+	/**
+     * Finds a wait strategy enum constant by its human-readable name.
+     *
+     * @param name the strategy name (e.g. "blocking", "busy-spin")
+     * @return the matching constant, or {@code null} if not found
+     */
 	public static WaitStrategies find(final String name) {
 		if (BLOCKING.name.equals(name)) {
 			return BLOCKING;
@@ -64,6 +79,12 @@ public enum WaitStrategies {
 		}
 	}
 
+	/**
+     * Creates a new WaitStrategy instance for the given name.
+     *
+     * @param name the strategy name
+     * @return a new wait strategy instance, or {@code null} if the name is unknown
+     */
 	public static WaitStrategy forName(final String name) {
 		final WaitStrategies found = find(name);
 		if (found != null) {
@@ -73,6 +94,11 @@ public enum WaitStrategies {
 		}
 	}
 
+	/**
+     * Creates a new instance of this wait strategy.
+     *
+     * @return a new wait strategy instance
+     */
 	public abstract WaitStrategy newInstance();
 
 }
