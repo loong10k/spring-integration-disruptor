@@ -13,6 +13,11 @@ import com.lmax.disruptor.EventHandler;
 
 /**
  * An {@link EventHandler} that can forward the event to a {@link MessageChannel}.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see MessageChannel
+ * @see org.springframework.integration.core.MessageHandler
  */
 public final class ForwardingEventHandler extends AbstractEndpoint implements EventHandler<Object> {
 
@@ -53,6 +58,15 @@ public final class ForwardingEventHandler extends AbstractEndpoint implements Ev
 		this.messagingTemplate = messagingTemplate;
 	}
 
+	/**
+     * Handles a ring buffer event by converting and/or transforming it,
+     * then sending it to the configured channel.
+     *
+     * @param event       the event from the ring buffer
+     * @param sequence    the sequence number of the event
+     * @param endOfBatch  whether this is the last event in the current batch
+     * @throws Exception if conversion, transformation, or sending fails
+     */
 	public void onEvent(final Object event, final long sequence, final boolean endOfBatch) throws Exception {
 		final Message<?> message = this.convertAndTransform(event);
 		this.messagingTemplate.send(message);
@@ -81,16 +95,28 @@ public final class ForwardingEventHandler extends AbstractEndpoint implements Ev
 		}
 	}
 
+	/**
+	 * Validates that the channel is set and configures the messaging template.
+	 *
+	 * @throws Exception if initialization fails
+	 * @throws IllegalArgumentException if the channel is {@code null}
+	 */
 	@Override
 	protected void onInit() throws Exception {
 		Assert.isTrue(this.channel != null, "'channel' attribtue is mandatory.");
 		this.messagingTemplate.setDefaultChannel(this.channel);
 	}
 
+	/**
+	 * Template method for startup logic. No-op in this implementation.
+	 */
 	@Override
 	protected void doStart() {
 	}
 
+	/**
+	 * Template method for shutdown logic. No-op in this implementation.
+	 */
 	@Override
 	protected void doStop() {
 	}

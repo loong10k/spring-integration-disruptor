@@ -9,6 +9,16 @@ import com.lmax.disruptor.ClaimStrategy;
 import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 
+/**
+ * XML bean definition parser for the disruptor:disruptor element.
+ * Creates a Disruptor bean definition with the configured event factory,
+ * executor, claim strategy, and wait strategy.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see AbstractRingBufferParser
+ * @see DisruptorNamespaceElements
+ */
 public class DisruptorParser extends AbstractRingBufferParser {
 
 	@Override

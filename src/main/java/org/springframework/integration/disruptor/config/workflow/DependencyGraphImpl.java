@@ -8,6 +8,16 @@ import java.util.Map;
 
 import org.springframework.integration.disruptor.config.HandlerGroup;
 
+/**
+ * Adjacency-list implementation of the DependencyGraph interface. Supports
+ * symbolic name resolution, dependency traversal, and graph inversion for
+ * topological sorting.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see DependencyGraph
+ * @see DependencyTopologyBuilderImpl
+ */
 final class DependencyGraphImpl implements DependencyGraph {
 
 	private int size;

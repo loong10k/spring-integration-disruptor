@@ -10,21 +10,52 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 
+/**
+ * Utility class for finding methods on a target class that match a given
+ * MethodSpecification. Supports filtering by return type, argument types,
+ * and annotation presence.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see MethodSpecification
+ * @see AbstractMethodInvoker
+ */
 public final class MethodFinderUtils {
 
 	private MethodFinderUtils() {
 		throw new IllegalStateException("Utility class, do not instantiate.");
 	}
 
+	/**
+     * Finds methods on the target object matching the given specification.
+     *
+     * @param target        the object to search
+     * @param specification the method specification to match
+     * @return the list of matching methods
+     */
 	public static List<Method> findMethods(final Object target, final MethodSpecification specification) {
 		return findMethods(target.getClass(), specification);
 	}
 
+	/**
+     * Finds methods on the target class matching the given specification.
+     *
+     * @param targetClass   the class to search
+     * @param specification the method specification to match
+     * @return the list of matching methods
+     */
 	public static List<Method> findMethods(final Class<?> targetClass, final MethodSpecification specification) {
 		final List<Method> methods = Arrays.asList(ReflectionUtils.getAllDeclaredMethods(targetClass));
 		return findMethods(methods, specification);
 	}
 
+	/**
+     * Filters the given list of methods against the given specification.
+     *
+     * @param methods       the methods to filter
+     * @param specification the method specification to match
+     * @return the list of matching methods
+     */
 	public static List<Method> findMethods(final List<Method> methods, final MethodSpecification specification) {
 		final MethodFilter filter = createCompositeMethodFilter(specification);
 		return findMatchingMethods(methods, filter);

@@ -10,6 +10,15 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.StringUtils;
 
+/**
+ * Factory that creates an Executor for running disruptor event processors.
+ * If a named executor bean is configured, it is looked up from the BeanFactory;
+ * otherwise a cached thread pool is created.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see AbstractDisruptorWorkflowFactoryBean
+ */
 final class ExecutorFactory implements BeanFactoryAware {
 
 	private final Log log = LogFactory.getLog(this.getClass());
@@ -22,10 +31,21 @@ final class ExecutorFactory implements BeanFactoryAware {
 
 	private String executorName;
 
+	/**
+     * Sets the bean name of the executor to look up.
+     *
+     * @param executorName the executor bean name
+     */
 	public void setExecutorName(final String executorName) {
 		this.executorName = executorName;
 	}
 
+	/**
+     * Creates an Executor. If a name is set, looks up the bean; otherwise
+     * creates a default cached thread pool.
+     *
+     * @return the executor
+     */
 	public Executor createExecutorService() {
 		if (StringUtils.hasText(this.executorName)) {
 			this.log.info("Configuring DisruptorWorkflow with Executor named '" + this.executorName + "'.");

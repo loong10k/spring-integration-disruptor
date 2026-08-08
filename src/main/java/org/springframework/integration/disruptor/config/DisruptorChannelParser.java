@@ -7,6 +7,15 @@ import org.springframework.integration.disruptor.DisruptorChannel;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
+/**
+ * XML bean definition parser for the disruptor:channel element.
+ * Creates a DisruptorChannel bean definition backed by a named disruptor.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see DisruptorChannel
+ * @see DisruptorNamespaceElements
+ */
 public class DisruptorChannelParser extends AbstractChannelParser {
 
 	@Override

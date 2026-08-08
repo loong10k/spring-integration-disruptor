@@ -9,6 +9,15 @@ import org.springframework.integration.disruptor.ForwardingEventHandler;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
+/**
+ * XML bean definition parser for the disruptor:forwarding-event-handler element.
+ * Creates a ForwardingEventHandler bean definition with channel, converter,
+ * and transformer references.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see ForwardingEventHandler
+ */
 public final class ForwardingEventHandlerParser extends AbstractBeanDefinitionParser {
 
 	private static final String FOWARDING_EVENT_HANDLER_ATTRIBUTE_CHANNEL = "channel";

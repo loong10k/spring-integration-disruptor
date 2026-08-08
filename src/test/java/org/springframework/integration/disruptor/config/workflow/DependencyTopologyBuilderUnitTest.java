@@ -1,59 +1,93 @@
 package org.springframework.integration.disruptor.config.workflow;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
+import org.springframework.integration.disruptor.config.HandlerGroup;
 
+/**
+ * Unit tests for {@link DependencyTopologyBuilderImpl}.
+ */
 public class DependencyTopologyBuilderUnitTest {
 
-	private final DependencyTopologyBuilder topologyBuilder = new DependencyTopologyBuilderImpl();
-
 	@Test
-	public void Empty_Graph() {
-		final DependencyGraph graph = new DependencyGraphImpl();
-		assertNotNull(this.topologyBuilder.buildTopology(graph));
-		assertTrue(this.topologyBuilder.buildTopology(graph).isEmpty());
-	}
+	public void shouldBuildTopologyForLinearDependency() {
+		final HandlerGroup groupA = createGroup("groupA", "ring-buffer");
+		final HandlerGroup groupB = createGroup("groupB", "groupA");
 
-	@Test
-	public void Graph_with_single_node() {
-		final DependencyGraph graph = new DependencyGraphImpl();
-		graph.addDependency("group1").dependsOnNone();
-		final List<String> topology = this.topologyBuilder.buildTopology(graph);
-		assertNotNull(topology);
-		assertEquals(1, topology.size());
-		assertEquals("group1", topology.get(0));
-	}
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Arrays.asList(groupA, groupB));
+		final DependencyTopologyBuilder builder = new DependencyTopologyBuilderImpl();
+		final List<String> topology = builder.buildTopology(graph);
 
-	@Test
-	public void Graph_with_multiple_nodes_1() {
-		final DependencyGraph graph = new DependencyGraphImpl();
-		graph.addDependency("group2").dependsOn("group1");
-		graph.addDependency("group3").dependsOn("group1");
-		final List<String> topology = this.topologyBuilder.buildTopology(graph);
 		assertNotNull(topology);
 		assertEquals(3, topology.size());
-		assertEquals("group3", topology.get(0));
-		assertEquals("group2", topology.get(1));
-		assertEquals("group1", topology.get(2));
+		assertTrue(topology.contains("ring-buffer"));
+		assertTrue(topology.contains("groupA"));
+		assertTrue(topology.contains("groupB"));
+		// The topology builder produces a valid topological ordering:
+		// dependents appear before their dependencies (stack-based DFS post-order)
+		final int ringBufferIdx = topology.indexOf("ring-buffer");
+		final int groupAIdx = topology.indexOf("groupA");
+		final int groupBIdx = topology.indexOf("groupB");
+		assertTrue(ringBufferIdx > groupAIdx);
+		assertTrue(groupAIdx > groupBIdx);
 	}
 
 	@Test
-	public void Graph_with_multiple_nodes_2() {
-		final DependencyGraph graph = new DependencyGraphImpl();
-		graph.addDependency("group2").dependsOn("group1");
-		graph.addDependency("group3").dependsOn("group2");
-		graph.addDependency("group1").dependsOn("group4");
-		final List<String> topology = this.topologyBuilder.buildTopology(graph);
+	public void shouldBuildTopologyForSingleGroup() {
+		final HandlerGroup group = createGroup("solo", "ring-buffer");
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Collections.singletonList(group));
+		final DependencyTopologyBuilder builder = new DependencyTopologyBuilderImpl();
+		final List<String> topology = builder.buildTopology(graph);
+
+		assertNotNull(topology);
+		assertEquals(2, topology.size());
+	}
+
+	@Test
+	public void shouldBuildTopologyForEmptyGraph() {
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Collections.<HandlerGroup>emptyList());
+		final DependencyTopologyBuilder builder = new DependencyTopologyBuilderImpl();
+		final List<String> topology = builder.buildTopology(graph);
+		assertNotNull(topology);
+		assertTrue(topology.isEmpty());
+	}
+
+	@Test
+	public void shouldBuildTopologyForDiamondDependency() {
+		final HandlerGroup groupA = createGroup("groupA", "ring-buffer");
+		final HandlerGroup groupB = createGroup("groupB", "ring-buffer");
+		final HandlerGroup groupC = createGroup("groupC", "groupA,groupB");
+		groupC.setDependencies(Arrays.asList("groupA", "groupB"));
+
+		final DependencyGraph graph = DependencyGraphImpl.forHandlerGroups(Arrays.asList(groupA, groupB, groupC));
+		final DependencyTopologyBuilder builder = new DependencyTopologyBuilderImpl();
+		final List<String> topology = builder.buildTopology(graph);
+
 		assertNotNull(topology);
 		assertEquals(4, topology.size());
-		assertEquals("group3", topology.get(0));
-		assertEquals("group2", topology.get(1));
-		assertEquals("group1", topology.get(2));
-		assertEquals("group4", topology.get(3));
+		assertTrue(topology.contains("ring-buffer"));
+		assertTrue(topology.contains("groupA"));
+		assertTrue(topology.contains("groupB"));
+		assertTrue(topology.contains("groupC"));
+		// In the stack-based DFS post-order, dependents come before dependencies
+		final int groupCIdx = topology.indexOf("groupC");
+		final int groupAIdx = topology.indexOf("groupA");
+		final int groupBIdx = topology.indexOf("groupB");
+		assertTrue(groupCIdx < groupAIdx);
+		assertTrue(groupCIdx < groupBIdx);
+	}
+
+	private HandlerGroup createGroup(final String name, final String... deps) {
+		final HandlerGroup group = new HandlerGroup();
+		group.setName(name);
+		group.setDependencies(Arrays.asList(deps));
+		group.setHandlerBeanNames(Collections.singletonList("handler"));
+		group.setEventProcessors(Collections.<com.lmax.disruptor.EventProcessor>emptyList());
+		return group;
 	}
 }
