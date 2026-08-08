@@ -10,10 +10,24 @@ import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.EventTranslator;
 import com.lmax.disruptor.dsl.Disruptor;
 
+/**
+ * A MessageDispatcher that publishes messages into a LMAX Disruptor ring buffer.
+ * Registered MessageHandlers are invoked for each event processed from the ring buffer.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see DisruptorChannel
+ * @see com.lmax.disruptor.dsl.Disruptor
+ */
 public class DisruptorDispatcher extends AbstractDispatcher {
 
 	private final Disruptor<MessagingEvent> disruptor;
 
+	/**
+     * Constructs a dispatcher that registers an internal event handler with the given disruptor.
+     *
+     * @param disruptor the LMAX disruptor instance; must not be {@code null}
+     */
 	public DisruptorDispatcher(final Disruptor<MessagingEvent> disruptor) {
 		this.disruptor = this.registerHandlerFor(disruptor);
 	}
@@ -34,6 +48,12 @@ public class DisruptorDispatcher extends AbstractDispatcher {
 		return disruptor;
 	}
 
+	/**
+     * Dispatches a message by publishing it as an event into the disruptor ring buffer.
+     *
+     * @param message the message to dispatch; must not be {@code null}
+     * @return always {@code true}, since ring buffer publication does not block
+     */
 	public boolean dispatch(final Message<?> message) {
 		this.disruptor.publishEvent(new EventTranslator<MessagingEvent>() {
 
@@ -45,6 +65,9 @@ public class DisruptorDispatcher extends AbstractDispatcher {
 		return true;
 	}
 
+	/**
+     * Starts the underlying disruptor, activating all registered event handlers.
+     */
 	public void onInit() {
 		this.disruptor.start();
 	}

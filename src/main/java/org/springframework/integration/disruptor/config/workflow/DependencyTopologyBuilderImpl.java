@@ -4,6 +4,15 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 
+/**
+ * Depth-first-search implementation of DependencyTopologyBuilder that produces
+ * a topological ordering of dependency graph nodes.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see DependencyTopologyBuilder
+ * @see DependencyGraph
+ */
 final class DependencyTopologyBuilderImpl implements DependencyTopologyBuilder {
 
 	public List<String> buildTopology(final DependencyGraph graph) {

@@ -7,8 +7,25 @@ import org.springframework.integration.disruptor.config.workflow.reflection.Abst
 import org.springframework.integration.disruptor.config.workflow.reflection.MethodSpecification;
 import org.springframework.util.ReflectionUtils;
 
+/**
+ * An EventFactory adapter that invokes a method on a target object annotated
+ * with @EventFactory to create new event instances.
+ * 
+ * @param <T> the event type
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see EventFactoryFactory
+ * @see org.springframework.integration.disruptor.config.annotation.EventFactory
+ */
 public class MethodInvokingEventFactoryAdapter<T> extends AbstractMethodInvoker<T> implements com.lmax.disruptor.EventFactory<T> {
 
+	/**
+     * Constructs an adapter that delegates event creation to a method on the target object.
+     *
+     * @param target       the object containing the factory method
+     * @param expectedType the expected event type
+     */
 	public MethodInvokingEventFactoryAdapter(final Object target, final Class<T> expectedType) {
 		super(target, expectedType);
 	}
@@ -38,6 +55,11 @@ public class MethodInvokingEventFactoryAdapter<T> extends AbstractMethodInvoker<
 		return EventFactory.class;
 	}
 
+	/**
+     * Creates a new event by invoking the resolved factory method on the target.
+     *
+     * @return a new event instance
+     */
 	public T newInstance() {
 		return this.cast(ReflectionUtils.invokeMethod(this.method, this.target));
 	}

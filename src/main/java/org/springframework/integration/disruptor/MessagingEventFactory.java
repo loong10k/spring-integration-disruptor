@@ -7,6 +7,11 @@ import com.lmax.disruptor.EventFactory;
  */
 public final class MessagingEventFactory implements EventFactory<MessagingEvent> {
 
+	/**
+     * Creates a new {@link MessagingEvent} instance.
+     *
+     * @return a new, empty messaging event
+     */
 	public MessagingEvent newInstance() {
 		return new MessagingEvent();
 	}

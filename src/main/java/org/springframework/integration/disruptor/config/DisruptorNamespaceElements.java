@@ -1,5 +1,13 @@
 package org.springframework.integration.disruptor.config;
 
+/**
+ * Constants class holding XML element and attribute names used by the
+ * disruptor Spring Integration namespace configuration.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see DisruptorNamespaceHandler
+ */
 final class DisruptorNamespaceElements {
 
 	private DisruptorNamespaceElements() {

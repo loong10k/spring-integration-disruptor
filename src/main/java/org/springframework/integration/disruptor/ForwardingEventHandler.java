@@ -53,6 +53,15 @@ public final class ForwardingEventHandler extends AbstractEndpoint implements Ev
 		this.messagingTemplate = messagingTemplate;
 	}
 
+	/**
+     * Handles a ring buffer event by converting and/or transforming it,
+     * then sending it to the configured channel.
+     *
+     * @param event       the event from the ring buffer
+     * @param sequence    the sequence number of the event
+     * @param endOfBatch  whether this is the last event in the current batch
+     * @throws Exception if conversion, transformation, or sending fails
+     */
 	public void onEvent(final Object event, final long sequence, final boolean endOfBatch) throws Exception {
 		final Message<?> message = this.convertAndTransform(event);
 		this.messagingTemplate.send(message);

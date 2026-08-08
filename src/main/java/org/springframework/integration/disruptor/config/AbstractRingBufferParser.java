@@ -16,6 +16,17 @@ import com.lmax.disruptor.ClaimStrategy;
 import com.lmax.disruptor.MultiThreadedClaimStrategy;
 import com.lmax.disruptor.WaitStrategy;
 
+/**
+ * Abstract XML bean definition parser for elements that configure a LMAX RingBuffer.
+ * Provides common parsing logic for buffer size, wait strategy, claim strategy,
+ * event factory, and executor attributes.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see ClaimStrategies
+ * @see WaitStrategies
+ * @see DisruptorNamespaceElements
+ */
 abstract class AbstractRingBufferParser extends AbstractBeanDefinitionParser {
 
 	private final Log log = LogFactory.getLog(AbstractRingBufferParser.class);

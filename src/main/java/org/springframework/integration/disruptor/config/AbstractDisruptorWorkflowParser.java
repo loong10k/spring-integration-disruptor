@@ -24,6 +24,16 @@ import org.w3c.dom.Element;
 import com.lmax.disruptor.ClaimStrategy;
 import com.lmax.disruptor.WaitStrategy;
 
+/**
+ * Abstract XML bean definition parser for disruptor workflow elements.
+ * Parses common attributes such as event type, event factory, wait strategy,
+ * claim strategy, executor, handler groups, and translator.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see AbstractRingBufferParser
+ * @see HandlerGroup
+ */
 abstract class AbstractDisruptorWorkflowParser extends AbstractRingBufferParser {
 
 	@Override

@@ -11,6 +11,16 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
+/**
+ * XML bean definition parser for the disruptor:message-driven-workflow element.
+ * Creates a MessageDrivenDisruptorWorkflowFactoryBean bean definition with
+ * publisher channel configuration.
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see AbstractDisruptorWorkflowParser
+ * @see config.workflow.MessageDrivenDisruptorWorkflowFactoryBean
+ */
 public final class MessageDrivenDisruptorWorkflowParser extends AbstractDisruptorWorkflowParser {
 
 	@Override
