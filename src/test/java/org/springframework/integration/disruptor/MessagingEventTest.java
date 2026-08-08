@@ -11,10 +11,10 @@ import com.lmax.disruptor.EventFactory;
 /**
  * Unit tests for {@link MessagingEvent}.
  */
-class MessagingEventTest {
+public class MessagingEventTest {
 
 	@Test
-	void shouldCreateViaFactoryMethod() {
+	public void shouldCreateViaFactoryMethod() {
 		final EventFactory<MessagingEvent> factory = MessagingEvent.newEventFactory();
 		assertNotNull(factory);
 		final MessagingEvent event = factory.newInstance();
@@ -23,7 +23,7 @@ class MessagingEventTest {
 	}
 
 	@Test
-	void shouldSetAndGetPayload() {
+	public void shouldSetAndGetPayload() {
 		final MessagingEvent event = new MessagingEvent();
 		final Message<String> message = MessageBuilder.withPayload("test").build();
 		event.setPayload(message);
@@ -31,14 +31,14 @@ class MessagingEventTest {
 	}
 
 	@Test
-	void shouldAllowNullPayload() {
+	public void shouldAllowNullPayload() {
 		final MessagingEvent event = new MessagingEvent();
 		event.setPayload(null);
 		assertNull(event.getPayload());
 	}
 
 	@Test
-	void shouldOverwritePayload() {
+	public void shouldOverwritePayload() {
 		final MessagingEvent event = new MessagingEvent();
 		final Message<String> first = MessageBuilder.withPayload("first").build();
 		final Message<String> second = MessageBuilder.withPayload("second").build();

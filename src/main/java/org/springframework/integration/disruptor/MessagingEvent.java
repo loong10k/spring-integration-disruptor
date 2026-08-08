@@ -7,8 +7,13 @@ import com.lmax.disruptor.RingBuffer;
 
 /**
  * Holder class for {@link Message}s in the {@link RingBuffer}.
- * 
- * This is the default event type for the {@link MessageDrivenDisruptorWorkflow}.
+ *
+ * <p>This is the default event type for the {@link MessageDrivenDisruptorWorkflow}.</p>
+ *
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
+ * @since 3.0.0
+ * @see MessagingEventFactory
+ * @see MessageDrivenDisruptorWorkflow
  */
 public final class MessagingEvent {
 

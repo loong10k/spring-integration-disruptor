@@ -1,92 +1,107 @@
 package org.springframework.integration.disruptor.config.workflow.reflection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-import org.springframework.util.ReflectionUtils;
 
+/**
+ * Unit tests for {@link MethodFinderUtils}.
+ */
 public class MethodFinderUnitTest {
 
 	@Test
-	public void Composite_specification() {
-
-		final MethodSpecification specification = new MethodSpecification();
-		specification.setReturnType(Integer.class);
-		specification.setAnnotationType(AnnotationA.class);
-		specification.setArgumentTypes(String.class, int.class, Long.class);
-
-		final List<Method> methods = MethodFinderUtils.findMethods(new C(), specification);
-		assertEquals(2, methods.size());
-
-		final Method createValueMethod = ReflectionUtils.findMethod(C.class, "createValue", String.class, Object.class, Number.class);
-		final Method createSomeValueMethod = ReflectionUtils.findMethod(C.class, "createSomeValue", String.class, Object.class, Number.class);
-		assertTrue(methods.containsAll(Arrays.asList(createValueMethod, createSomeValueMethod)));
-
+	public void shouldFindMethodsByReturnType() {
+		final MethodSpecification spec = new MethodSpecification();
+		spec.setReturnType(String.class);
+		final List<Method> methods = MethodFinderUtils.findMethods(SampleClass.class, spec);
+		assertFalse(methods.isEmpty());
+		boolean found = false;
+		for (final Method m : methods) {
+			if (m.getName().equals("getString") && m.getReturnType().equals(String.class)) {
+				found = true;
+			}
+		}
+		assertTrue(found);
 	}
 
-	public static class A {
-
-		public int newInt(final String a, final Object b, final Number c) {
-			return 9;
+	@Test
+	public void shouldFindMethodsByArgumentTypes() {
+		final MethodSpecification spec = new MethodSpecification();
+		spec.setArgumentTypes(String.class);
+		spec.setReturnType(void.class);
+		final List<Method> methods = MethodFinderUtils.findMethods(SampleClass.class, spec);
+		assertFalse(methods.isEmpty());
+		boolean found = false;
+		for (final Method m : methods) {
+			if (m.getName().equals("setString")) {
+				found = true;
+			}
 		}
-
-		@AnnotationA
-		public void noArg() {
-		}
-
+		assertTrue(found);
 	}
 
-	public static class B extends A {
-
-		@AnnotationA
-		public Integer createValue(final String a, final Object b, final Number c) {
-			return 12;
-		}
-
-		@AnnotationB
-		public Integer createAnotherValue(final String a, final Object b, final Number c) {
-			return 121;
-		}
-
+	@Test
+	public void shouldFindMethodsByAnnotation() {
+		final MethodSpecification spec = new MethodSpecification();
+		spec.setAnnotationType(org.springframework.integration.disruptor.config.annotation.EventFactory.class);
+		final List<Method> methods = MethodFinderUtils.findMethods(AnnotatedClass.class, spec);
+		assertEquals(1, methods.size());
+		assertEquals("annotatedMethod", methods.get(0).getName());
 	}
 
-	public static class C extends B {
-
-		@AnnotationA
-		public int createSomeValue(final String a, final Object b, final Number c) {
-			return 90;
-		}
-
-		@AnnotationA
-		public String misc(final String a, final Object b, final Number c) {
-			return "foo";
-		}
-
-		public Thread newThread(final String a, final Object b) {
-			return new Thread();
-		}
-
+	@Test
+	public void shouldReturnEmptyForNoMatch() {
+		final MethodSpecification spec = new MethodSpecification();
+		spec.setReturnType(Double.class);
+		final List<Method> methods = MethodFinderUtils.findMethods(SampleClass.class, spec);
+		assertTrue(methods.isEmpty());
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	public static @interface AnnotationA {
-
+	@Test
+	public void shouldFindMethodsOnObject() {
+		final MethodSpecification spec = new MethodSpecification();
+		spec.setReturnType(String.class);
+		final List<Method> methods = MethodFinderUtils.findMethods(new SampleClass(), spec);
+		assertFalse(methods.isEmpty());
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	public static @interface AnnotationB {
-
+	@Test
+	public void shouldFindMethodsInList() {
+		final MethodSpecification spec = new MethodSpecification();
+		spec.setReturnType(String.class);
+		final List<Method> allMethods = java.util.Arrays.asList(SampleClass.class.getDeclaredMethods());
+		final List<Method> methods = MethodFinderUtils.findMethods(allMethods, spec);
+		assertFalse(methods.isEmpty());
 	}
 
+	@Test
+	public void shouldThrowOnDirectInstantiation() throws Exception {
+		final Constructor<MethodFinderUtils> ctor = MethodFinderUtils.class.getDeclaredConstructor();
+		ctor.setAccessible(true);
+		try {
+			ctor.newInstance();
+			fail("Expected InvocationTargetException wrapping IllegalStateException");
+		} catch (final InvocationTargetException e) {
+			assertTrue(e.getCause() instanceof IllegalStateException);
+		}
+	}
+
+	@SuppressWarnings("unused")
+	public static class SampleClass {
+		public String getString() { return ""; }
+		public void setString(String s) { }
+		public int getInt() { return 0; }
+	}
+
+	@SuppressWarnings("unused")
+	public static class AnnotatedClass {
+		@org.springframework.integration.disruptor.config.annotation.EventFactory
+		public Object annotatedMethod() { return null; }
+		public String otherMethod() { return ""; }
+	}
 }

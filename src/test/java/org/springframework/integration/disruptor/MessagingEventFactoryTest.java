@@ -7,10 +7,10 @@ import org.junit.Test;
 /**
  * Unit tests for {@link MessagingEventFactory}.
  */
-class MessagingEventFactoryTest {
+public class MessagingEventFactoryTest {
 
 	@Test
-	void shouldCreateNewMessagingEvent() {
+	public void shouldCreateNewMessagingEvent() {
 		final MessagingEventFactory factory = new MessagingEventFactory();
 		final MessagingEvent event = factory.newInstance();
 		assertNotNull(event);
@@ -18,7 +18,7 @@ class MessagingEventFactoryTest {
 	}
 
 	@Test
-	void shouldCreateDistinctInstances() {
+	public void shouldCreateDistinctInstances() {
 		final MessagingEventFactory factory = new MessagingEventFactory();
 		final MessagingEvent first = factory.newInstance();
 		final MessagingEvent second = factory.newInstance();
